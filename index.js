@@ -38,10 +38,6 @@ io.on('connection', (socket) => {
 });
 
 
-server.listen(PORT, () => {
-  console.log(`express listening on ${PORT}`);
-});
-
 
 // hub logger function
 const logEvent = (eventName, payload) => {
@@ -81,5 +77,9 @@ capsServer.on('connection', (socket) => {
 
   // capsServer.to('room-Id').emit('pickup', payload);
 
+});
+
+server.listen(PORT, () => {
+  console.log(`express listening on ${PORT}`);
 });
 

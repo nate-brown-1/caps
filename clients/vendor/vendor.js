@@ -5,7 +5,7 @@ require('dotenv').config();
 const { generatePayload, handleDelivered } = require('./vendor-handler.js');
 
 const { io } = require('socket.io-client');
-const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
+const SERVER_URL = 'https://caps-awvp.onrender.com' || process.env.SERVER_URL /*|| 'http://localhost:3001'*/;
 
 let capsSocket = io(SERVER_URL + '/caps');
 
