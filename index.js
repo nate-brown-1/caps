@@ -56,6 +56,9 @@ capsServer.on('connection', (socket) => {
   socket.on('in-transit', (payload) => {
     logEvent('in-transit', payload);
     socket.broadcast.emit('in-transit', payload);
+  });
+
+  socket.on('delivered', (payload) => {
     logEvent('delivered', payload);
     socket.broadcast.emit('delivered', payload);
   });
