@@ -14,10 +14,10 @@
       "error",
       "always"
     ],
-    "indent": [
-      "error",
-      2
-    ],
+    // "indent": [
+    //   "error",
+    //   2
+    // ],
     "new-cap": "warn",
     "no-console": "off",
     "no-multi-spaces": [
@@ -39,8 +39,8 @@
     "no-undefined": "off",
     "no-unused-vars": "off",
     "quotes": [
-      "warn",
-      "single",
+      // "warn",
+      // "single",
       {
         "allowTemplateLiterals": true
       }
