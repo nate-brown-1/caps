@@ -8,7 +8,8 @@ describe('test driver functions', () => {
     let payload = {};
     console.log = jest.fn();
     handlePickup(payload);
-    expect(console.log).toHaveBeenCalled();
+    // handle pickup should trigger 2 console logs : in-transit and delivered
+    expect(console.log).toHaveBeenCalledTimes(2);
   });
 
 });

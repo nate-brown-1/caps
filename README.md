@@ -66,6 +66,7 @@ As a developer, I want to create an event driven system so that I can write code
 - Export a single EventEmitter from the Node JS module.
 - Should be imported by any module that needs to notify or be alerted by other modules of an event.
 
+// DONE
 #### Implement a Module for Managing Global Package Events
 
 - Listens to ALL events in the Event Pool.
@@ -82,6 +83,7 @@ As a developer, I want to create an event driven system so that I can write code
   }
 }
 
+// DONE
 #### Vendor Client Application
 
 - Implement a Module for Managing Vendor Events.
@@ -99,6 +101,7 @@ HINT: Have some fun by using the Chance library to make up phony information.
 - Listens for a delivered event and responds by logging a message to the console:
   - Thank you, <customer-name>
 
+// DONE
 #### Driver Client Application
 
 - Implement a Module for Managing Driver Events.
@@ -137,6 +140,11 @@ EVENT { event: 'delivered',
 
 ### Testing
 
+// DONE
 - Write unit tests for each event handler function (not event triggers themselves).
+
+// DONE
 - Use spies to help testing your logger methods (assert that console.log was called right).
+
+// DONE
 - Testing Note - *The "event system" in Node.js has already been tested. What we want to test here is connectivity -- is your code responding to the right events?
