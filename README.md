@@ -1,16 +1,18 @@
 # CAPS: Code Academy Parcel Service
 
-## CAPS Phase 1
+## CAPS Phase 2
 
-Begin the build of an application for a product called CAPS - The Code Academy Parcel Service. In this sprint, we'll build out a system that emulates a real world supply chain. CAPS will simulate a delivery service where vendors (such a flower shops) will ship products using our delivery service and when our drivers deliver them, each vendor will be notified that their customers received what they purchased.
+Continue working on a multi-day build of our delivery tracking system, creating an event observable over a network with Socket.io.
 
-This will be an event driven application that "distributes" the responsibility for logging to separate modules, using only events to trigger logging based on activity.
+In this phase, we’ll be moving away from using Node Events for managing a pool of events, instead refactoring to using the Socket.io libraries. This allows communication between Server and Client applications.
+
+The intent here is to build the data services that would drive a suite of applications where we can see pickups and deliveries in real-time.
 
 ## Whiteboard
 
 Create a UML diagram of the CAPS system on a whiteboard before you start.
 
-![CAPS Whiteboard: Phase 1](./img/event-emitter-whiteboard.png)
+![CAPS Whiteboard: Phase 2](./img/event-emitter-whiteboard.png)
 
 Create a new repository for this project, called 'caps' and work in a branch called 'events'.
 
@@ -18,25 +20,35 @@ Create a new repository for this project, called 'caps' and work in a branch cal
 
 Refer to the CAPS System Overview for a complete review of the application, including Business and Technical requirements along with the development roadmap.
 
-## Phase 1 Requirements
+## Phase 2 Requirements
 
-Today, we begin the first of a 4-Phase build of the CAPS system, written in Node.js. In this first phase, our goal is to setup a pool of events and handler functions, with the intent being to refactor parts of the system throughout the week, but keep the handlers themselves largely the same. The task of "delivering a package" doesn't change (the handler), even if the mechanism for triggering that task (the event) does.
+In Phase 2, we’ll be changing the underlying networking implementation of our CAPS system from using node events to using a library called Socket.io so that clients can communicate over a network. Socket.io manages the connection pool for us, making broadcasting much easier to operate, and works well both on the terminal (between servers) and with web clients.
+
+The core functionality we’ve already built remains the same. The difference in this phase is that we’ll be creating a networking layer. As such, the user stories that speak to application functionality remain unchanged, but our developer story changes to reflect the work needed for refactoring.
 
 ### User Stories
-
-The following user/developer stories detail the major functionality for this phase of the project.
 
 As a vendor, I want to alert the system when I have a package to be picked up.
 As a driver, I want to be notified when there is a package to be delivered.
 As a driver, I want to alert the system when I have picked up a package and it is in transit.
 As a driver, I want to alert the system when a package has been delivered.
 As a vendor, I want to be notified when my package has been delivered.
-And as developers, here are some of the development stories that are relevant to the above.
+And as developers, here is our updated story relevant to the above.
 
-As a developer, I want to use industry standards for managing the state of each package.
-As a developer, I want to create an event driven system so that I can write code that happens in response to events, in real time.
+As a developer, I want to create network event driven system using Socket.io so that I can write code that responds to events originating from both servers and client applications
 
 ## Technical Requirements / Notes
+
+### Overview
+
+The goal of this lab is to create a namespaced Socket.io event server, and to configure Vendor and Driver Client Modules.
+
+- The Socket Server will create a namespace of caps that will receive all CAPS event traffic.
+- Each Vendor and Driver Client will connect to the caps namespace.
+- The server will emit specific events to each socket that is listening for their designated events from the Global Event Pool defined in the Server.
+- Each Vendor will only emit and listen for specific events based on their Vendor ID. This will be managed by rooms within Socket.io.
+- Each Driver will “pick up” a package when the vendor notifies the Server that an “order” is ready and simulate “in-transit” and “delivered” events.
+- The expected output of the 3 running applications is the same as it was in Phase 2.
 
 ### Proposed File Structure
 
@@ -62,89 +74,47 @@ As a developer, I want to create an event driven system so that I can write code
 
 #### Global Event Pool (HUB)
 
-- Implement a Module for a Global Event Pool.
-- Export a single EventEmitter from the Node JS module.
-- Should be imported by any module that needs to notify or be alerted by other modules of an event.
+1. Use the socket.io npm package to configure an event Server that can be started at a designated port using node.
+  a. Accept connections on a namespace called caps, and configure socket objects from clients.
+  b. Ensure that client sockets are connecting to their appropriate room if specified.
+2. Configure a Global Event Pool that every client socket should listen for:
+  a. pickup - this will be broadcast to all sockets except the sender.
+  b. in-transit - this will be emitted only to Vendors that have joined the appropriate room.
+  c. delivered - this will be be emitted only to Vendors that have joined the appropriate room.
 
-// DONE
-#### Implement a Module for Managing Global Package Events
+NOTE: You may need to create an extra event here that allows clients to join rooms.
 
-- Listens to ALL events in the Event Pool.
-- Logs a timestamp and the payload of every event.
-
-"EVENT": { 
-  "event": "pickup",
-  "time": "2020-03-06T18:27:17.732Z",
-  "payload": { 
-    "store": "1-206-flowers",
-    "orderID": "e3669048-7313-427b-b6cc-74010ca1f8f0",
-    "customer": "Jamal Braun",
-    "address": "Schmittfort, LA"
-  }
-}
-
-// DONE
 #### Vendor Client Application
 
-- Implement a Module for Managing Vendor Events.
-- Your implementation should use a store name as a parameter.
-- When triggered, the vendor module simulates a pickup event for the given store name to the Global Event Pool:
-  - emits pickup to the global event pool.
-  - sends a vendor order payload:
- {
-   "store": "<store-name>",
-   "orderId": "<unique-order-id>",
-   "customer": "<customer-name>",
-   "address": "<city-state>"
- }
-HINT: Have some fun by using the Chance library to make up phony information.
-- Listens for a delivered event and responds by logging a message to the console:
-  - Thank you, <customer-name>
+1. Connects to the CAPS Application Server using socket.io-client:
+  a. Make sure your module connects to the caps namespace.
+  b. Use the store name 1-206-flowers to simulate a single vendor
+  c. Upon connection, use the store name as a vendor id to join a room.
+2. Upon connection, simulate new customer orders:
+  a. Create a payload object with your store name, order id, customer name, and address.
+  b. Emit that message to the CAPS server with an event called pickup.
+  c. Emit in a setInterval() to simulate multiple orders and observe system functionality.
+3. Listen for the delivered event coming in from the CAPS server.
+  a. Console log: Thank you for your order <customer-name>.
+4. Optionally, you can exit the application using process.exit() or clearInterval(<interval-id>) within a setTimeout() to simulate multiple orders and then stop.
 
-// DONE
 #### Driver Client Application
 
-- Implement a Module for Managing Driver Events.
-- Listens for a pickup event from the Global Event Pool and responds with the following:
-- Log a message to the console: DRIVER: picked up <ORDER_ID>.
-- Emit an in-transit event to the Global Event Pool with the order payload.
-- Log a confirmation message to the console: DRIVER: delivered <ORDER_ID>.
-- Emit a delivered event to the Global Event Pool with the order payload.
-- When running, your console output should look something like this:
+1. Connects to the CAPS Application Server using socket.io-client:
+  a. Make sure this module connects to the caps namespace.
+2. Once connected, the Driver client module should listen for any appropriate events from the Server:
+  a. When a pickup is emitted from the Server, simulate all specified Driver behaviors.
+3. Simulate the following events and emit payloads to the CAPS Application Server upon receiving a “pickup” event:
+  a. in-transit
+    a. Log “picking up payload.id” to the console.
+    b. emit an in-transit event to the CAPS server with the payload.
+  b. delivered
+    a. emit a delivered event to the CAPS server with the payload.
 
-EVENT { event: 'pickup',
-  time: 2020-03-06T18:27:17.732Z,
-  payload:
-   { store: '1-206-flowers',
-     orderID: 'e3669048-7313-427b-b6cc-74010ca1f8f0',
-     customer: 'Jamal Braun',
-     address: 'Schmittfort, LA' } }
-DRIVER: picked up e3669048-7313-427b-b6cc-74010ca1f8f0
-EVENT { event: 'in-transit',
-  time: 2020-03-06T18:27:18.738Z,
-  payload:
-   { store: '1-206-flowers',
-     orderID: 'e3669048-7313-427b-b6cc-74010ca1f8f0',
-     customer: 'Jamal Braun',
-     address: 'Schmittfort, LA' } }
-DRIVER: delivered up e3669048-7313-427b-b6cc-74010ca1f8f0
-VENDOR: Thank you for delivering e3669048-7313-427b-b6cc-74010ca1f8f0
-EVENT { event: 'delivered',
-  time: 2020-03-06T18:27:20.736Z,
-  payload:
-   { store: '1-206-flowers',
-     orderID: 'e3669048-7313-427b-b6cc-74010ca1f8f0',
-     customer: 'Jamal Braun',
-     address: 'Schmittfort, LA' } }
-...
+When running, the vendor and driver consoles should show their own logs. Additionally, the CAPS server should be logging everything.
 
 ### Testing
 
-// DONE
 - Write unit tests for each event handler function (not event triggers themselves).
-
-// DONE
-- Use spies to help testing your logger methods (assert that console.log was called right).
-
-// DONE
-- Testing Note - *The "event system" in Node.js has already been tested. What we want to test here is connectivity -- is your code responding to the right events?
+- Use jest spies and/or mock functionality to assert that your handlers were called and ran as expected.
+- For our use case, was console.log() and .emit() called with the expected arguments?
