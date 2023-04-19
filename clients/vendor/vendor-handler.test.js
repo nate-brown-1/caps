@@ -10,7 +10,7 @@ describe('test vendor functions', () => {
     expect(typeof(testPayload)).toEqual('object');
   });
 
-  test('can console.log after order delivered', () => {
+  test('can say thanks after order delivered', () => {
     let payload = {};
     console.log = jest.fn();
     handleDelivered(payload);

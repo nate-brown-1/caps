@@ -1,15 +1,22 @@
 'use strict';
 
-const handlePickup = require('./driver-handler.js');
+const { reportInTransit, reportDelivered } = require('./driver-handler.js');
 
 describe('test driver functions', () => {
 
-  test('can report order picked up', () => {
+  test('can report order in transit', () => {
     let payload = {};
     console.log = jest.fn();
-    handlePickup(payload);
-    // handle pickup should trigger 2 console logs : in-transit and delivered
-    expect(console.log).toHaveBeenCalledTimes(2);
+    reportInTransit(payload);
+    expect(console.log).toHaveBeenCalled();
+  });
+
+
+  test('can report order delivered', () => {
+    let payload = {};
+    console.log = jest.fn();
+    reportDelivered(payload);
+    expect(console.log).toHaveBeenCalled();
   });
 
 });
