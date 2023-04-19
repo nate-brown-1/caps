@@ -57,25 +57,24 @@ capsServer.on('connection', (socket) => {
   // console.log('client connected to CAPS namespace ', socket.id);
 
   socket.on('join-room', (payload) => {
-    socket.join(payload.roomId);
+    socket.join(payload.store);
   });
 
   socket.on('pickup', (payload) => {
     logEvent('pickup', payload);
+    socket.emit('pickup', payload);
     socket.broadcast.emit('pickup', payload);
   });
 
   socket.on('in-transit', (payload) => {
     logEvent('in-transit', payload);
-    socket.broadcast.emit('in-transit', payload);
+    socket.to(payload.store).emit('in-transit', payload);
   });
 
   socket.on('delivered', (payload) => {
     logEvent('delivered', payload);
-    socket.broadcast.emit('delivered', payload);
+    socket.to(payload.store).emit('delivered', payload);
   });
-
-  // capsServer.to('room-Id').emit('pickup', payload);
 
 });
 
