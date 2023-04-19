@@ -18,3 +18,7 @@ capsSocket.emit('pickup', generatePayload());
 capsSocket.on('delivered', (payload) => {
   handleDelivered(payload);
 });
+
+
+// process.exit()
+// end node process after order delivered
