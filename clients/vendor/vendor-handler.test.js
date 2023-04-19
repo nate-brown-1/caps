@@ -1,6 +1,6 @@
 'use strict';
 
-const { handleDelivered, generatePayload } = require('./handler.js');
+const { handleDelivered, generatePayload } = require('./vendor-handler.js');
 
 describe('test vendor functions', () => {
 

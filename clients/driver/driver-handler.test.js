@@ -1,6 +1,6 @@
 'use strict';
 
-const handlePickup = require('./handler.js');
+const handlePickup = require('./driver-handler.js');
 
 describe('test driver functions', () => {
 

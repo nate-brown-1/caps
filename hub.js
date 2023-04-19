@@ -1,20 +1,26 @@
-'use strict';
+// 'use strict';
 
-const eventEmitter = require('./eventPool.js');
+// require('dotenv').config();
 
-const logEvent = (eventName) => (payload) => {
-  console.log(`
-    EVENT: {
-      event: ${eventName},
-      time: ${new Date()},
-      payload: `,payload
-  );
-};
+// // modules, maybe need these?
+// require('./clients/driver/driver');
+// require('./clients/vendor/vendor');
 
+// const { io } = require('socket.io-client');
+// const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 
-eventEmitter.on('pickup', logEvent('pickup'));
-eventEmitter.on('in-transit', logEvent('in-transit'));
-eventEmitter.on('delivered', logEvent('delivered'));
+// // hub logger function
+// const logEvent = (eventName, payload) => {
+//   console.log(`EVENT: {
+//       event: ${eventName},
+//       time: ${new Date()},
+//       payload: `, payload
+//   );
+// };
 
-require('./driver');
-require('./vendor');
+// let capsSocket = io(SERVER_URL + '/caps');
+
+// capsSocket.on('pickup', (payload) => {
+//   // console.log('hub gets payload');
+//   logEvent('pickup', payload);
+// });
