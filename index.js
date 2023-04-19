@@ -18,11 +18,6 @@ const PORT = process.env.PORT || 3001;
 
 const io = new Server(server);
 
-server.listen(PORT, () => {
-  console.log(`express listening on ${PORT}`);
-});
-
-
 // start server, don't think I need any of these emitters, for reference only
 io.on('connection', (socket) => {
   console.log('client has connected to server', socket.id);
@@ -40,6 +35,11 @@ io.on('connection', (socket) => {
   // socket.broadcast.emit('event', payload);
 
   // });
+});
+
+
+server.listen(PORT, () => {
+  console.log(`express listening on ${PORT}`);
 });
 
 
