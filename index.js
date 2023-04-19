@@ -6,18 +6,22 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
+const http = require('http');
+
 const cors = require('cors');
 app.use(cors);
+
+const server = http.createServer(app);
 
 const { Server } = require('socket.io');
 const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () => {
+const io = new Server(server);
+
+server.listen(PORT, () => {
   console.log(`express listening on ${PORT}`);
 });
 
-
-const io = new Server(PORT);
 
 // start server, don't think I need any of these emitters, for reference only
 io.on('connection', (socket) => {
