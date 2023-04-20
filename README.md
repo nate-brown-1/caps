@@ -1,6 +1,6 @@
 # CAPS: Code Academy Parcel Service
 
-## CAPS Phase 2
+## CAPS Phase 3
 
 Continue working on a multi-day build of our delivery tracking system, creating an event observable over a network with Socket.io.
 
