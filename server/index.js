@@ -11,7 +11,6 @@ const http = require('http');
 const cors = require('cors');
 app.use(cors);
 
-// http from socket.io documentation, I added this when making my server run on render
 const server = http.createServer(app);
 
 const { Server } = require('socket.io');
@@ -52,6 +51,16 @@ const logEvent = (eventName, payload) => {
 
 // create namespace for CAPS
 let capsServer = io.of('/caps');
+
+// names here for reference, event names are used in place for readability
+const globalEventPool = [
+  'pickup',
+  'in-transit',
+  'delivered',
+  'join-room',
+  'received'
+];
+
 
 // turn on the namespace
 capsServer.on('connection', (socket) => {

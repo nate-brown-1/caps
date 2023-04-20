@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 
-const { generatePayload, handleDelivered } = require('./vendor-handler.js');
+const { generatePayload, handleDelivered } = require('./flower-vendor-handler.js');
 
 const { io } = require('socket.io-client');
 
@@ -23,7 +23,7 @@ capsSocket.emit('pickup', generatePayload());
 // have the vendor join the room
 capsSocket.on('pickup', (payload) => {
   capsSocket.emit('join-room', payload);
-  console.log(`vendor connected to ${payload.store} room`);
+  console.log(`FLOWER_VENDOR: connected to ${payload.store} room`);
 });
 
 // last thing, say thanks for order

@@ -3,9 +3,10 @@
 const Chance = require('chance');
 const chance = new Chance();
 
+// hard code store name, leave rest of random order generator
 function generatePayload() {
   return {
-    "store": chance.company(),
+    "store": "acme-widgets",
     "orderId": chance.guid(),
     "customer": chance.name(),
     "address": chance.address()
@@ -13,7 +14,7 @@ function generatePayload() {
 }
 
 function handleDelivered(payload) {
-  console.log(`VENDOR: Thank you for delivering order ${payload.orderId} to ${payload.customer}`);
+  console.log(`WIDGET_VENDOR: Thank you for delivering order ${payload.orderId} to ${payload.customer}`);
 }
 
 module.exports = {
