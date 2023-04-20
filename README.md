@@ -1,41 +1,46 @@
 # CAPS: Code Academy Parcel Service
 
-## CAPS Phase 3 Messages - New Pull Request
-
-Continue working on a multi-day build of our delivery tracking system, creating an event observable over a network with Socket.io.
-
-In this phase, we’ll be moving away from using Node Events for managing a pool of events, instead refactoring to using the Socket.io libraries. This allows communication between Server and Client applications.
-
-The intent here is to build the data services that would drive a suite of applications where we can see pickups and deliveries in real-time.
+## CAPS Phase 3
 
 ## Whiteboard
 
 Create a UML diagram of the CAPS system on a whiteboard before you start.
 
-![CAPS Whiteboard: Phase 2](./img/event-emitter-whiteboard.png)
-
-Create a new repository for this project, called 'caps' and work in a branch called 'events'.
+![CAPS Whiteboard: Phase 3](./img/event-emitter-whiteboard.png)
 
 ## Business Requirements
 
 Refer to the CAPS System Overview for a complete review of the application, including Business and Technical requirements along with the development roadmap.
 
-## Phase 2 Requirements
+### Phase 3 Requirements
 
-In Phase 2, we’ll be changing the underlying networking implementation of our CAPS system from using node events to using a library called Socket.io so that clients can communicate over a network. Socket.io manages the connection pool for us, making broadcasting much easier to operate, and works well both on the terminal (between servers) and with web clients.
+In Phase 3, we are building a set of features to help manage deliveries made by CAPS Drivers. This will simulate a delivery driver receiving a list of orders from a Queue and “scanning” package codes on delivery. Retailers will be able to see in their dashboard or log, a list of all packages delivered in real time. Should a delivery driver deliver any packages while the retailer is not connected to the dashboard, the vendor client should be guaranteed to receive “delivery” notifications from the Queue system.
 
-The core functionality we’ve already built remains the same. The difference in this phase is that we’ll be creating a networking layer. As such, the user stories that speak to application functionality remain unchanged, but our developer story changes to reflect the work needed for refactoring.
+Our Server is going to have the same overall functionality, but we want to incorporate a few improvements to existing features:
+We want a feature to keep a log of payloads that reach our system, organized by vendor and event type.
+Payloads are “published” to the appropriate Clients for the appropriate events.
+Client Vendor Applications used by retailers, should subscribe to appropriate Vendor Queues so that they can be alerted when a delivery was made.
+The Client can ask for all undelivered messages from a particular Server Queue.
+When a Client receives a message, it will need to let the hub server know that it was received.
 
 ### User Stories
 
-As a vendor, I want to alert the system when I have a package to be picked up.
-As a driver, I want to be notified when there is a package to be delivered.
-As a driver, I want to alert the system when I have picked up a package and it is in transit.
-As a driver, I want to alert the system when a package has been delivered.
-As a vendor, I want to be notified when my package has been delivered.
-And as developers, here is our updated story relevant to the above.
+As a vendor, I want to “subscribe” to “delivered” notifications so that I know when my packages are delivered.
+As a vendor, I want to “catch up” on any “delivered” notifications that I might have missed so that I can see a complete log.
+As a driver, I want to “subscribe” to “pickup” notifications so that I know what packages to deliver.
+As a driver, I want to “catch up” on any “pickup” notifications I may have missed so that I can deliver everything.
+As a driver, I want a way to “scan” a delivery so that the vendors know when a package has been delivered.
+And as developers, here are some of the development stories that are newly relevant to the above.
 
-As a developer, I want to create network event driven system using Socket.io so that I can write code that responds to events originating from both servers and client applications
+
+As a developer, I want to create a system of tracking who is subscribing to each event.
+As a developer, I want to place all inbound messages into a “queue” so that my application knows what events are to be delivered.
+As a developer, I want to create a system for communicating when events have been delivered and received by subscribers.
+As a developer, I want to delete messages from the queue after they’ve been received by a subscriber, so that I don’t re-send them.
+As a developer, I want to create a system for allowing subscribers to retrieve all undelivered messages in their queue.
+Technical Requirements / Notes
+Overview
+We are adding a new module to the CAPS Application Server to guarantee that payloads from events are delivered to any Client Module that is listening for specific events. This lab will refactor the Server and Client Modules to persist payloads on the Server side and remove them once received by clients.
 
 ## Technical Requirements / Notes
 
@@ -55,18 +60,30 @@ The goal of this lab is to create a namespaced Socket.io event server, and to co
 ├── .github
 │   ├── workflows
 │   │   └── node.yml
-├── driver
-│   ├── handler.js
-│   ├── index.js
-│   └── driver-handler.test.js
-├── vendor
-│   ├── handler.js
-│   ├── index.js
-│   └── vendor-handler.test.js
+├── clients
+│   ├── driver
+│   │   ├── handler.js
+│   │   ├── index.js
+│   │   └── driver-handler.test.js
+│   ├── flower-vendor
+│   │   ├── handler.js
+│   │   ├── index.js
+│   │   └── flower-handler.test.js
+│   ├── lib
+│   │   ├── client.js (optional)
+│   │   └── client.test.js (optional)
+│   ├── widget-vendor
+│   │   ├── handler.js
+│   │   ├── index.js
+│   │   └── widget-handler.test.js
+│   └── socket.js (socket instance useful for mocks/testing)
+├── server
+│   ├── lib
+│   │   ├── queue.js
+│   │   └── queue.test.js
+│   └── index.js
 ├── .eslintrc.json
 ├── .gitignore
-├── eventPool.js.
-├── hub.js.
 ├── package.json
 └── README.md
 
@@ -74,47 +91,59 @@ The goal of this lab is to create a namespaced Socket.io event server, and to co
 
 #### Global Event Pool (HUB)
 
-1. Use the socket.io npm package to configure an event Server that can be started at a designated port using node.
-  a. Accept connections on a namespace called caps, and configure socket objects from clients.
-  b. Ensure that client sockets are connecting to their appropriate room if specified.
-2. Configure a Global Event Pool that every client socket should listen for:
-  a. pickup - this will be broadcast to all sockets except the sender.
-  b. in-transit - this will be emitted only to Vendors that have joined the appropriate room.
-  c. delivered - this will be be emitted only to Vendors that have joined the appropriate room.
-
-NOTE: You may need to create an extra event here that allows clients to join rooms.
+Use the socket.io npm package to configure an event Server that can be started at a designated port using node.
+We still need the Server to configure socket connections to the caps namespace on a specified PORT.
+Create a Message Queue that can store payloads for specific Clients.
+Each payload that is read by the pickup event should be added to a Queue for Driver clients.
+Each payload that is read by the delivered event should be added to a Queue for Vendor clients.
+This could be as simple as an Object or Array, or as complex as a Module that connects to and performs operations against a database.
+Add a received event to the Global Event Pool.
+When this event is heard on the server, assume it’s a Client Module telling you a payload was successfully read.
+The payload should include the client id, event name, and message id, so that you can delete it from the Queue.
+Add a getAll event to the Global Event Pool.
+The payload should include the client id and event name.
+When this event is heard on the server, find each of the messages in the queue for the client, for the event specified.
+Go through each of the entries for the client/event in the queue (if any) and broadcast them to the client.
+Refactor the delivered, pickup, and in-transit events in the Global Event Pool.
+We need to be able to add payloads to the appropriate Queue for specific Clients.
+When these events are triggered, add the payload immediately to the appropriate Queue.
+Broadcast the same event, with the following payload to all subscribers.
+Note: The payload event value should correspond to either pickup or delivered; whichever is being emitted from the corresponding vendor or driver client(s).
 
 #### Vendor Client Application
 
-1. Connects to the CAPS Application Server using socket.io-client:
-  a. Make sure your module connects to the caps namespace.
-  b. Use the store name 1-206-flowers to simulate a single vendor
-  c. Upon connection, use the store name as a vendor id to join a room.
-2. Upon connection, simulate new customer orders:
-  a. Create a payload object with your store name, order id, customer name, and address.
-  b. Emit that message to the CAPS server with an event called pickup.
-  c. Emit in a setInterval() to simulate multiple orders and observe system functionality.
-3. Listen for the delivered event coming in from the CAPS server.
-  a. Console log: Thank you for your order <customer-name>.
-4. Optionally, you can exit the application using process.exit() or clearInterval(<interval-id>) within a setTimeout() to simulate multiple orders and then stop.
+Create 2 separate “stores” that use the Vendor Client module.
+Create one store called acme-widgets and 1-800-flowers.
+Connect to the CAPS Application Server using the caps namespace.
+Both stores should “subscribe” to different Queues, since they are separate stores.
+On startup, your client applications should trigger a getAll event that fetches all messages from the server that are in that Vendor’s Queue (events/messages they’ve not yet received).
+Trigger the received event with the correct payload to the server.
+Subscribe to the delivered Queue.
+Each client should be able to receive payloads “published” to the delivered Queue.
+We still want to log a confirmation with the “order-id” and payload.
 
 #### Driver Client Application
 
-1. Connects to the CAPS Application Server using socket.io-client:
-  a. Make sure this module connects to the caps namespace.
-2. Once connected, the Driver client module should listen for any appropriate events from the Server:
-  a. When a pickup is emitted from the Server, simulate all specified Driver behaviors.
-3. Simulate the following events and emit payloads to the CAPS Application Server upon receiving a “pickup” event:
-  a. in-transit
-    a. Log “picking up payload.id” to the console.
-    b. emit an in-transit event to the CAPS server with the payload.
-  b. delivered
-    a. emit a delivered event to the CAPS server with the payload.
+Refactor event logic to use Queues.
+Make sure your Driver Client is subscribing to the appropriate Vendor Queues.
+Upon connection, Driver Client can fetch any messages added to their subscribed Queues.
 
 When running, the vendor and driver consoles should show their own logs. Additionally, the CAPS server should be logging everything.
+
+### Visual Validation
+
+Start all 3 servers.
+Queue Server.
+All Client Application Servers.
+Stop one of your applications servers.
+Re-send some requests to your queue.
+This should leave some undelivered messages.
+Re-start the application server.
+It should do an immediate request of all queued messages and log them normally.
 
 ### Testing
 
 - Write unit tests for each event handler function (not event triggers themselves).
 - Use jest spies and/or mock functionality to assert that your handlers were called and ran as expected.
 - For our use case, was console.log() and .emit() called with the expected arguments?
+- Write unit tests for the queue module.

@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 
-const { generatePayload, handleDelivered } = require('./vendor-handler.js');
+const { generatePayload, handleDelivered } = require('./widget-vendor-handler.js');
 
 const { io } = require('socket.io-client');
 
