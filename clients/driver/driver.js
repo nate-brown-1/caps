@@ -14,7 +14,7 @@ let capsSocket = io(SERVER_URL + '/caps');
 // respond to pickup
 capsSocket.on('pickup', (payload) => {
   capsSocket.emit('join-room', payload);
-  console.log(`driver connected to ${payload.store} room`);
+  console.log(`DRIVER: connected to ${payload.store} room`);
 });
 
 // report moving

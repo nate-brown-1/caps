@@ -52,6 +52,16 @@ const logEvent = (eventName, payload) => {
 // create namespace for CAPS
 let capsServer = io.of('/caps');
 
+// names here for reference, event names are used in place for readability
+const globalEventPool = [
+  'pickup',
+  'in-transit',
+  'delivered',
+  'join-room',
+  'received'
+];
+
+
 // turn on the namespace
 capsServer.on('connection', (socket) => {
   // console.log('client connected to CAPS namespace ', socket.id);

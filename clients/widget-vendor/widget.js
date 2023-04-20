@@ -23,7 +23,7 @@ capsSocket.emit('pickup', generatePayload());
 // have the vendor join the room
 capsSocket.on('pickup', (payload) => {
   capsSocket.emit('join-room', payload);
-  console.log(`vendor connected to ${payload.store} room`);
+  console.log(`WIDGET_VENDOR: connected to ${payload.store} room`);
 });
 
 // last thing, say thanks for order
