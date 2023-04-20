@@ -1,8 +1,8 @@
 'use strict';
 
-const { handleDelivered, generatePayload } = require('./vendor-handler.js');
+const { handleDelivered, generatePayload } = require('./flower-vendor-handler.js');
 
-describe('test vendor functions', () => {
+describe('test flower vendor functions', () => {
 
   test('can generate payload', () => {
     let testPayload = generatePayload();

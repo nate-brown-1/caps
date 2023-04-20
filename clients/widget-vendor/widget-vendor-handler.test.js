@@ -1,8 +1,8 @@
 'use strict';
 
-const { handleDelivered, generatePayload } = require('./vendor-handler.js');
+const { handleDelivered, generatePayload } = require('./widget-vendor-handler.js');
 
-describe('test vendor functions', () => {
+describe('test widget vendor functions', () => {
 
   test('can generate payload', () => {
     let testPayload = generatePayload();
