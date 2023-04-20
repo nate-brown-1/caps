@@ -1,6 +1,6 @@
 'use strict';
 
-const { handleDelivered, generatePayload } = require('./handler.js');
+const { handleDelivered, generatePayload } = require('./vendor-handler.js');
 
 describe('test vendor functions', () => {
 
@@ -10,7 +10,7 @@ describe('test vendor functions', () => {
     expect(typeof(testPayload)).toEqual('object');
   });
 
-  test('can console.log after order delivered', () => {
+  test('can say thanks after order delivered', () => {
     let payload = {};
     console.log = jest.fn();
     handleDelivered(payload);
